@@ -38,7 +38,7 @@ final class KeyboardViewController: UIInputViewController {
         host.didMove(toParent: self)
         self.host = host
 
-        let height = view.heightAnchor.constraint(equalToConstant: 255)
+        let height = view.heightAnchor.constraint(equalToConstant: 250)
         height.priority = .defaultHigh
         height.isActive = true
     }
@@ -98,16 +98,9 @@ struct GlassKeyboardView: View {
             }
             .frame(height: 46)
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 6)
         .padding(.vertical, 10)
-        .background {
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .fill(Color.clear)
-                .glassEffect(.regular, in: .rect(cornerRadius: 30))
-                .shadow(color: Color.black.opacity(0.16), radius: 20, x: 0, y: 8)
-        }
-        .padding(.horizontal, 8)
-        .padding(.bottom, 4)
+        .background(Color.clear)
     }
 }
 
