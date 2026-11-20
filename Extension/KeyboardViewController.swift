@@ -163,7 +163,7 @@ final class GlassKey: UIControl {
         rim.lineWidth = 1.0
         layer.addSublayer(rim)
 
-        
+            }
 
     required init?(coder: NSCoder) { fatalError() }
 
