@@ -41,6 +41,16 @@ final class KeyboardViewController: UIInputViewController {
         height.priority = .defaultHigh
         height.isActive = true
     }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        view.backgroundColor = .clear
+        var ancestor = view.superview
+        while let current = ancestor {
+            current.backgroundColor = .clear
+            ancestor = current.superview
+        }
+    }
 }
 
 @MainActor
@@ -116,7 +126,7 @@ struct KeyCap: View {
             .font(.system(size: size, weight: weight))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
-            .scaleEffect(pressed ? 1.06 : 1.0)
+            .scaleEffect(pressed ? 1.15 : 1.0)
             .animation(.spring(response: 0.26, dampingFraction: 0.65), value: pressed)
             .contentShape(Rectangle())
             .gesture(
