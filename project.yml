@@ -2,7 +2,7 @@ name: GlassKeyboard
 options:
   bundleIdPrefix: com.xx168ss.glasskeyboard
   deploymentTarget:
-    iOS: "15.0"
+    iOS: "26.0"
   createIntermediateGroups: true
 
 settings:
