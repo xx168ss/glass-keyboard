@@ -90,7 +90,7 @@ struct GlassKeyboardView: View {
                 .frame(height: 46)
             }
             HStack(spacing: 7) {
-                KeyCap(title: "123", weight: .medium, size: 15) { model.insert("1") }
+                KeyCap(title: "地球", weight: .medium, size: 15) { model.switchKeyboard() }
                 KeyCap(title: ",", weight: .medium, size: 16) { model.insert("，") }
                 KeyCap(title: "空格", weight: .medium, size: 15) { model.insert(" ") }
                 KeyCap(title: "。", weight: .medium, size: 16) { model.insert("。") }
@@ -104,7 +104,7 @@ struct GlassKeyboardView: View {
             RoundedRectangle(cornerRadius: 30, style: .continuous)
                 .fill(Color.clear)
                 .glassEffect(.regular, in: .rect(cornerRadius: 30))
-                .shadow(color: Color.black.opacity(0.18), radius: 22, x: 0, y: 10)
+                .shadow(color: Color.black.opacity(0.16), radius: 20, x: 0, y: 8)
         }
         .padding(.horizontal, 8)
         .padding(.bottom, 4)
@@ -121,6 +121,7 @@ struct KeyCap: View {
     @State private var hideToken = 0
 
     private let systemBlue = Color(red: 0.0, green: 0.478, blue: 1.0)
+    private let glassTint = Color(red: 0.93, green: 0.93, blue: 0.99)
 
     var body: some View {
         Text(title)
@@ -129,23 +130,24 @@ struct KeyCap: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(pressed ? systemBlue : Color.white.opacity(0.55))
+                    .fill(pressed ? systemBlue : glassTint.opacity(0.5))
             }
             .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 14))
-            .shadow(color: Color.black.opacity(pressed ? 0.0 : 0.14), radius: 5, x: 0, y: 2)
             .overlay {
-                if pressed {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.white.opacity(0.22), Color.white.opacity(0.0)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .allowsHitTesting(false)
-                }
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.85),
+                                     Color.white.opacity(0.10),
+                                     Color.white.opacity(0.45)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                    .allowsHitTesting(false)
             }
+            .shadow(color: Color.black.opacity(pressed ? 0.0 : 0.12), radius: 5, x: 0, y: 2)
             .scaleEffect(pressed ? 1.5 : 1.0)
             .zIndex(pressed ? 1 : 0)
             .shadow(color: pressed ? systemBlue.opacity(0.55) : .clear, radius: 18)
