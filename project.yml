@@ -1,1 +1,52 @@
+name: GlassKeyboard
+options:
+  bundleIdPrefix: com.xx168ss.glasskeyboard
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
 
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGNING_ALLOWED: "NO"
+
+targets:
+  GlassKeyboardHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: Host
+    info:
+      path: Host/Info.plist
+      properties:
+        CFBundleDisplayName: 玻璃键盘
+        UILaunchScreen: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xx168ss.glasskeyboard
+        TARGETED_DEVICE_FAMILY: "1,2"
+    dependencies:
+      - target: GlassKeyboard
+
+  GlassKeyboard:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Extension
+    info:
+      path: Extension/Info.plist
+      properties:
+        CFBundleDisplayName: 玻璃键盘
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+          NSExtensionAttributes:
+            IsASCIICapable: true
+            PrefersRightToLeft: false
+            PrimaryLanguage: zh-Hans
+            RequestsOpenAccess: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xx168ss.glasskeyboard.keyboard
+        TARGETED_DEVICE_FAMILY: "1,2"
