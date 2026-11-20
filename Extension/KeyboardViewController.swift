@@ -134,13 +134,35 @@ struct KeyCap: View {
 
     @State private var pressed = false
 
+    private let systemBlue = Color(red: 0.0, green: 0.478, blue: 1.0)
+
     var body: some View {
         Text(title)
             .font(.system(size: size, weight: weight))
+            .foregroundStyle(pressed ? Color.white : Color.primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(pressed ? systemBlue.opacity(0.92) : Color.clear)
+            }
             .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
-            .scaleEffect(pressed ? 1.15 : 1.0)
-            .animation(.spring(response: 0.26, dampingFraction: 0.65), value: pressed)
+            .overlay {
+                if pressed {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.35), Color.white.opacity(0.02)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .allowsHitTesting(false)
+                }
+            }
+            .scaleEffect(pressed ? 1.28 : 1.0)
+            .zIndex(pressed ? 1 : 0)
+            .shadow(color: pressed ? systemBlue.opacity(0.45) : .clear, radius: 14)
+            .animation(.spring(response: 0.28, dampingFraction: 0.6), value: pressed)
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
