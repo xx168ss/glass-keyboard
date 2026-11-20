@@ -8,6 +8,7 @@ final class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .clear
+        view.isOpaque = false
 
         let model = KeyboardModel(
             insert: { [weak self] text in
@@ -23,6 +24,7 @@ final class KeyboardViewController: UIInputViewController {
 
         let host = UIHostingController(rootView: GlassKeyboardView(model: model))
         host.view.backgroundColor = .clear
+        host.view.isOpaque = false
         host.view.translatesAutoresizingMaskIntoConstraints = false
         addChild(host)
         view.addSubview(host.view)
@@ -35,7 +37,7 @@ final class KeyboardViewController: UIInputViewController {
         host.didMove(toParent: self)
         self.host = host
 
-        let height = view.heightAnchor.constraint(equalToConstant: 260)
+        let height = view.heightAnchor.constraint(equalToConstant: 250)
         height.priority = .defaultHigh
         height.isActive = true
     }
@@ -68,53 +70,68 @@ struct GlassKeyboardView: View {
     private let rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
 
     var body: some View {
-        VStack(spacing: 9) {
+        VStack(spacing: 8) {
             ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                HStack(spacing: 7) {
+                HStack(spacing: 8) {
                     if index == 2 {
-                        KeyCap(title: "⇧") { model.shift.toggle() }
+                        KeyCap(title: "⇧", weight: .medium, size: 16) { model.shift.toggle() }
                     }
                     ForEach(Array(row.enumerated()), id: \.offset) { _, ch in
-                        KeyCap(title: model.shift ? String(ch).uppercased() : String(ch)) {
+                        KeyCap(title: model.shift ? String(ch).uppercased() : String(ch),
+                               weight: .regular, size: 23) {
                             model.tapLetter(String(ch))
                         }
                     }
                     if index == 2 {
-                        KeyCap(title: "⌫") { model.delete() }
+                        KeyCap(title: "⌫", weight: .medium, size: 16) { model.delete() }
                     }
                 }
-                .frame(height: 50)
+                .frame(height: 49)
             }
-            HStack(spacing: 7) {
-                KeyCap(title: "地球") { model.switchKeyboard() }
-                KeyCap(title: ",") { model.insert("，") }
-                KeyCap(title: "空格") { model.insert(" ") }
-                KeyCap(title: "。") { model.insert("。") }
-                KeyCap(title: "⏎") { model.insert("\n") }
+            HStack(spacing: 8) {
+                KeyCap(title: "地球", weight: .medium, size: 16) { model.switchKeyboard() }
+                KeyCap(title: ",", weight: .medium, size: 16) { model.insert("，") }
+                KeyCap(title: "空格", weight: .medium, size: 16) { model.insert(" ") }
+                KeyCap(title: "。", weight: .medium, size: 16) { model.insert("。") }
+                KeyCap(title: "⏎", weight: .medium, size: 16) { model.insert("\n") }
             }
-            .frame(height: 50)
+            .frame(height: 49)
         }
-        .padding(.horizontal, 5)
-        .padding(.vertical, 9)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 10)
+        .background {
+            Rectangle()
+                .fill(Color.clear)
+                .glassEffect(.clear, in: .rect(cornerRadius: 22))
+        }
     }
 }
 
 struct KeyCap: View {
     let title: String
+    var weight: Font.Weight = .regular
+    var size: CGFloat = 22
     let action: () -> Void
 
     @State private var pressed = false
 
     var body: some View {
         Text(title)
-            .font(.system(size: 22, weight: .regular))
+            .font(.system(size: size, weight: weight))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 12))
-            .scaleEffect(pressed ? 0.95 : 1.0)
-            .animation(.spring(response: 0.22, dampingFraction: 0.7), value: pressed)
-            .onLongPressGesture(minimumDuration: 0, pressing: { isDown in
-                pressed = isDown
-            }, perform: {})
-            .onTapGesture { action() }
+            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 14))
+            .scaleEffect(pressed ? 0.94 : 1.0)
+            .animation(.spring(response: 0.22, dampingFraction: 0.72), value: pressed)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !pressed { pressed = true }
+                    }
+                    .onEnded { _ in
+                        pressed = false
+                        action()
+                    }
+            )
     }
 }
