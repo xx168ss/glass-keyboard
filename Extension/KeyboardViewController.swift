@@ -4,10 +4,12 @@ final class KeyboardViewController: UIInputViewController {
 
     private let rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
     private var shiftOn = true
+    private var letterButtons: [UIButton] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         buildKeyboard()
+        applyShift()
     }
 
     private func buildKeyboard() {
@@ -36,10 +38,12 @@ final class KeyboardViewController: UIInputViewController {
                 rowStack.addArrangedSubview(functionKey("⇧", action: #selector(toggleShift)))
             }
             for ch in row {
-                rowStack.addArrangedSubview(letterKey(String(ch)))
+                let button = letterKey(String(ch))
+                letterButtons.append(button)
+                rowStack.addArrangedSubview(button)
             }
             if index == 2 {
-                rowStack.addArrangedSubview(functionKey("⌫", action: #selector(deleteBackward)))
+                rowStack.addArrangedSubview(functionKey("⌫", action: #selector(deleteBackwardKey)))
             }
             root.addArrangedSubview(rowStack)
         }
@@ -51,17 +55,16 @@ final class KeyboardViewController: UIInputViewController {
 
         bottom.addArrangedSubview(functionKey("地球", action: #selector(nextKeyboard)))
         bottom.addArrangedSubview(functionKey(",", action: #selector(insertComma)))
-        let space = letterKey("空格")
-        bottom.addArrangedSubview(space)
+        bottom.addArrangedSubview(spaceKey())
         bottom.addArrangedSubview(functionKey("。", action: #selector(insertPeriod)))
         bottom.addArrangedSubview(functionKey("⏎", action: #selector(insertReturn)))
 
-        space.heightAnchor.constraint(equalToConstant: 46).isActive = true
         root.addArrangedSubview(bottom)
     }
 
     private func letterKey(_ title: String) -> UIButton {
-        let button = makeKey(title, weight: .regular)
+        let button = baseKey(title)
+        button.titleLabel?.font = .systemFont(ofSize: 22, weight: .regular)
         button.layer.cornerRadius = 9
         button.layer.cornerCurve = .continuous
         button.clipsToBounds = true
@@ -72,39 +75,63 @@ final class KeyboardViewController: UIInputViewController {
         button.insertSubview(blur, at: 0)
         button.layer.borderWidth = 0.8
         button.layer.borderColor = UIColor.white.withAlphaComponent(0.5).cgColor
+        button.addTarget(self, action: #selector(letterTapped(_:)), for: .touchUpInside)
+        return button
+    }
+
+    private func spaceKey() -> UIButton {
+        let button = baseKey("空格")
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.backgroundColor = UIColor.white.withAlphaComponent(0.22)
+        button.layer.cornerRadius = 9
+        button.layer.cornerCurve = .continuous
+        button.addTarget(self, action: #selector(insertSpace), for: .touchUpInside)
         return button
     }
 
     private func functionKey(_ title: String, action: Selector) -> UIButton {
-        let button = makeKey(title, weight: .medium)
+        let button = baseKey(title)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.backgroundColor = UIColor.white.withAlphaComponent(0.18)
         button.layer.cornerRadius = 9
         button.layer.cornerCurve = .continuous
-        button.backgroundColor = UIColor.white.withAlphaComponent(0.18)
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
 
-    private func makeKey(_ title: String, weight: UIFont.Weight) -> UIButton {
+    private func baseKey(_ title: String) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
         button.setTitleColor(UIColor.label, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 22, weight: weight)
-        button.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
         button.heightAnchor.constraint(equalToConstant: 46).isActive = true
         return button
     }
 
-    @objc private func keyTapped(_ sender: UIButton) {
-        guard let title = sender.title(for: .normal), title.count == 1 else { return }
-        let text = shiftOn ? title.uppercased() : title
-        (textDocumentProxy as UIKeyInput).insertText(text)
-        if shiftOn { shiftOn = false }
+    private func applyShift() {
+        for button in letterButtons {
+            guard let text = button.title(for: .normal) else { continue }
+            button.setTitle(shiftOn ? text.uppercased() : text.lowercased(), for: .normal)
+        }
     }
 
-    @objc private func toggleShift() { shiftOn.toggle() }
-    @objc private func deleteBackward() { (textDocumentProxy as UIKeyInput).deleteBackward() }
-    @objc private func insertComma() { (textDocumentProxy as UIKeyInput).insertText("，") }
-    @objc private func insertPeriod() { (textDocumentProxy as UIKeyInput).insertText("。") }
-    @objc private func insertReturn() { (textDocumentProxy as UIKeyInput).insertText("\n") }
+    @objc private func letterTapped(_ sender: UIButton) {
+        guard let title = sender.title(for: .normal) else { return }
+        textDocumentProxy.insertText(title)
+        if shiftOn {
+            shiftOn = false
+            applyShift()
+        }
+    }
+
+    @objc private func toggleShift() {
+        shiftOn.toggle()
+        applyShift()
+    }
+
+    @objc private func deleteBackwardKey() { textDocumentProxy.deleteBackward() }
+    @objc private func insertSpace() { textDocumentProxy.insertText(" ") }
+    @objc private func insertComma() { textDocumentProxy.insertText("，") }
+    @objc private func insertPeriod() { textDocumentProxy.insertText("。") }
+    @objc private func insertReturn() { textDocumentProxy.insertText("\n") }
     @objc private func nextKeyboard() { advanceToNextInputMode() }
 }
