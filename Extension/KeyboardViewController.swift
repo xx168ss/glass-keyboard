@@ -133,6 +133,7 @@ struct KeyCap: View {
     let action: () -> Void
 
     @State private var pressed = false
+    @State private var hideToken = 0
 
     private let systemBlue = Color(red: 0.0, green: 0.478, blue: 1.0)
 
@@ -173,10 +174,15 @@ struct KeyCap: View {
                         }
                     }
                     .onEnded { _ in
-                        withAnimation(.spring(response: 0.24, dampingFraction: 0.62)) {
-                            pressed = false
-                        }
                         action()
+                        hideToken += 1
+                        let token = hideToken
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                            guard token == hideToken else { return }
+                            withAnimation(.spring(response: 0.26, dampingFraction: 0.62)) {
+                                pressed = false
+                            }
+                        }
                     }
             )
     }
