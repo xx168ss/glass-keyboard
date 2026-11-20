@@ -182,6 +182,9 @@ final class GlassKey: UIControl {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         sheen.frame = bounds
+                let mask = CAShapeLayer()
+        mask.path = UIBezierPath(roundedRect: bounds, cornerRadius: 11).cgPath
+        sheen.mask = mask
         rim.path = UIBezierPath(roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5),
                                 cornerRadius: 11).cgPath
         rim.frame = bounds
