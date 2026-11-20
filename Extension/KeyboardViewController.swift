@@ -7,8 +7,7 @@ final class KeyboardViewController: UIInputViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .clear
-        view.isOpaque = false
+        clearBackdrop()
 
         let model = KeyboardModel(
             insert: { [weak self] text in
@@ -44,11 +43,25 @@ final class KeyboardViewController: UIInputViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        clearBackdrop()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.clearBackdrop()
+        }
+    }
+
+    private func clearBackdrop() {
         view.backgroundColor = .clear
-        var ancestor = view.superview
-        while let current = ancestor {
+        view.isOpaque = false
+        inputView?.backgroundColor = .clear
+
+        var node: UIView? = view
+        while let current = node {
             current.backgroundColor = .clear
-            ancestor = current.superview
+            current.isOpaque = false
+            if let effect = current as? UIVisualEffectView {
+                effect.effect = nil
+            }
+            node = current.superview
         }
     }
 }
