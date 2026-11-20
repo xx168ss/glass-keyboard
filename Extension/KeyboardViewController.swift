@@ -44,7 +44,7 @@ final class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         clearBackdrop()
-        for delay in [0.05, 0.2, 0.5] {
+        for delay in [0.05, 0.2, 0.5, 1.0] {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
                 self?.clearBackdrop()
             }
@@ -55,6 +55,7 @@ final class KeyboardViewController: UIInputViewController {
         view.backgroundColor = .clear
         view.isOpaque = false
         inputView?.backgroundColor = .clear
+        view.window?.backgroundColor = .clear
 
         var node: UIView? = view
         while let current = node {
@@ -152,7 +153,6 @@ struct KeyCap: View {
     @State private var hideToken = 0
 
     private let systemBlue = Color(red: 0.0, green: 0.478, blue: 1.0)
-    private let radius: CGFloat = 16
 
     var body: some View {
         Text(title)
@@ -160,62 +160,13 @@ struct KeyCap: View {
             .foregroundStyle(pressed ? Color.white : Color.primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(pressed ? systemBlue : Color.clear)
             }
-            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: radius))
-            .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.85),
-                                     Color.white.opacity(0.12),
-                                     Color.white.opacity(0.55)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
-                    .allowsHitTesting(false)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [Color.cyan.opacity(0.35),
-                                     Color.clear,
-                                     Color.pink.opacity(0.30)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-                    .blendMode(.plusLighter)
-                    .allowsHitTesting(false)
-            }
-            .overlay {
-                GeometryReader { geo in
-                    Ellipse()
-                        .fill(
-                            RadialGradient(
-                                colors: [Color.white.opacity(0.45), Color.clear],
-                                center: .center,
-                                startRadius: 0,
-                                endRadius: geo.size.width * 0.55
-                            )
-                        )
-                        .frame(width: geo.size.width * 0.88,
-                               height: geo.size.height * 0.5)
-                        .position(x: geo.size.width * 0.46,
-                                  y: geo.size.height * 0.26)
-                        .blur(radius: 6)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-                .allowsHitTesting(false)
-            }
+            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
             .overlay {
                 if pressed {
-                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [Color.white.opacity(0.22), Color.white.opacity(0.0)],
