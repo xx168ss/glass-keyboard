@@ -151,7 +151,7 @@ struct KeyCap: View {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(
                             LinearGradient(
-                                colors: [Color.white.opacity(0.35), Color.white.opacity(0.02)],
+                                colors: [Color.white.opacity(0.38), Color.white.opacity(0.02)],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -159,18 +159,23 @@ struct KeyCap: View {
                         .allowsHitTesting(false)
                 }
             }
-            .scaleEffect(pressed ? 1.28 : 1.0)
+            .scaleEffect(pressed ? 1.6 : 1.0)
             .zIndex(pressed ? 1 : 0)
-            .shadow(color: pressed ? systemBlue.opacity(0.45) : .clear, radius: 14)
-            .animation(.spring(response: 0.28, dampingFraction: 0.6), value: pressed)
+            .shadow(color: pressed ? systemBlue.opacity(0.5) : .clear, radius: 18)
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
-                        if !pressed { pressed = true }
+                        if !pressed {
+                            withAnimation(.easeOut(duration: 0.05)) {
+                                pressed = true
+                            }
+                        }
                     }
                     .onEnded { _ in
-                        pressed = false
+                        withAnimation(.spring(response: 0.24, dampingFraction: 0.62)) {
+                            pressed = false
+                        }
                         action()
                     }
             )
