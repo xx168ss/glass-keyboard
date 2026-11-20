@@ -7,7 +7,9 @@ final class KeyboardViewController: UIInputViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        clearBackdrop()
+        view.backgroundColor = .clear
+        view.isOpaque = false
+        inputView?.backgroundColor = .clear
 
         let model = KeyboardModel(
             insert: { [weak self] text in
@@ -36,50 +38,9 @@ final class KeyboardViewController: UIInputViewController {
         host.didMove(toParent: self)
         self.host = host
 
-        let height = view.heightAnchor.constraint(equalToConstant: 250)
+        let height = view.heightAnchor.constraint(equalToConstant: 255)
         height.priority = .defaultHigh
         height.isActive = true
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        clearBackdrop()
-        for delay in [0.05, 0.2, 0.5, 1.0] {
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-                self?.clearBackdrop()
-            }
-        }
-    }
-
-    private func clearBackdrop() {
-        view.backgroundColor = .clear
-        view.isOpaque = false
-        inputView?.backgroundColor = .clear
-        view.window?.backgroundColor = .clear
-
-        var node: UIView? = view
-        while let current = node {
-            current.backgroundColor = .clear
-            current.isOpaque = false
-            if let effect = current as? UIVisualEffectView {
-                effect.effect = nil
-            }
-            node = current.superview
-        }
-
-        if let window = view.window {
-            stripBlur(in: window)
-        }
-    }
-
-    private func stripBlur(in container: UIView) {
-        container.backgroundColor = .clear
-        if let effect = container as? UIVisualEffectView {
-            effect.effect = nil
-        }
-        for sub in container.subviews {
-            stripBlur(in: sub)
-        }
     }
 }
 
@@ -112,13 +73,13 @@ struct GlassKeyboardView: View {
     var body: some View {
         VStack(spacing: 8) {
             ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
-                HStack(spacing: 8) {
+                HStack(spacing: 7) {
                     if index == 2 {
                         KeyCap(title: "⇧", weight: .medium, size: 16) { model.shift.toggle() }
                     }
                     ForEach(Array(row.enumerated()), id: \.offset) { _, ch in
                         KeyCap(title: model.shift ? String(ch).uppercased() : String(ch),
-                               weight: .regular, size: 23) {
+                               weight: .regular, size: 22) {
                             model.tapLetter(String(ch))
                         }
                     }
@@ -126,20 +87,27 @@ struct GlassKeyboardView: View {
                         KeyCap(title: "⌫", weight: .medium, size: 16) { model.delete() }
                     }
                 }
-                .frame(height: 49)
+                .frame(height: 46)
             }
-            HStack(spacing: 8) {
-                KeyCap(title: "地球", weight: .medium, size: 16) { model.switchKeyboard() }
+            HStack(spacing: 7) {
+                KeyCap(title: "123", weight: .medium, size: 15) { model.insert("1") }
                 KeyCap(title: ",", weight: .medium, size: 16) { model.insert("，") }
-                KeyCap(title: "空格", weight: .medium, size: 16) { model.insert(" ") }
+                KeyCap(title: "空格", weight: .medium, size: 15) { model.insert(" ") }
                 KeyCap(title: "。", weight: .medium, size: 16) { model.insert("。") }
                 KeyCap(title: "⏎", weight: .medium, size: 16) { model.insert("\n") }
             }
-            .frame(height: 49)
+            .frame(height: 46)
         }
-        .padding(.horizontal, 6)
+        .padding(.horizontal, 8)
         .padding(.vertical, 10)
-        .background(Color.clear)
+        .background {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .fill(Color.clear)
+                .glassEffect(.regular, in: .rect(cornerRadius: 30))
+                .shadow(color: Color.black.opacity(0.18), radius: 22, x: 0, y: 10)
+        }
+        .padding(.horizontal, 8)
+        .padding(.bottom, 4)
     }
 }
 
@@ -160,13 +128,14 @@ struct KeyCap: View {
             .foregroundStyle(pressed ? Color.white : Color.primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(pressed ? systemBlue : Color.clear)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(pressed ? systemBlue : Color.white.opacity(0.55))
             }
-            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
+            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 14))
+            .shadow(color: Color.black.opacity(pressed ? 0.0 : 0.14), radius: 5, x: 0, y: 2)
             .overlay {
                 if pressed {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(
                             LinearGradient(
                                 colors: [Color.white.opacity(0.22), Color.white.opacity(0.0)],
@@ -177,7 +146,7 @@ struct KeyCap: View {
                         .allowsHitTesting(false)
                 }
             }
-            .scaleEffect(pressed ? 1.6 : 1.0)
+            .scaleEffect(pressed ? 1.5 : 1.0)
             .zIndex(pressed ? 1 : 0)
             .shadow(color: pressed ? systemBlue.opacity(0.55) : .clear, radius: 18)
             .contentShape(Rectangle())
