@@ -99,11 +99,7 @@ struct GlassKeyboardView: View {
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 10)
-        .background {
-            Rectangle()
-                .fill(Color.clear)
-                .glassEffect(.clear, in: .rect(cornerRadius: 22))
-        }
+        .background(Color.clear)
     }
 }
 
@@ -119,9 +115,9 @@ struct KeyCap: View {
         Text(title)
             .font(.system(size: size, weight: weight))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 14))
-            .scaleEffect(pressed ? 0.94 : 1.0)
-            .animation(.spring(response: 0.22, dampingFraction: 0.72), value: pressed)
+            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
+            .scaleEffect(pressed ? 1.06 : 1.0)
+            .animation(.spring(response: 0.26, dampingFraction: 0.65), value: pressed)
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
