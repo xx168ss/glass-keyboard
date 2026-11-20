@@ -44,8 +44,10 @@ final class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         clearBackdrop()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            self?.clearBackdrop()
+        for delay in [0.05, 0.2, 0.5] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.clearBackdrop()
+            }
         }
     }
 
@@ -62,6 +64,20 @@ final class KeyboardViewController: UIInputViewController {
                 effect.effect = nil
             }
             node = current.superview
+        }
+
+        if let window = view.window {
+            stripBlur(in: window)
+        }
+    }
+
+    private func stripBlur(in container: UIView) {
+        container.backgroundColor = .clear
+        if let effect = container as? UIVisualEffectView {
+            effect.effect = nil
+        }
+        for sub in container.subviews {
+            stripBlur(in: sub)
         }
     }
 }
@@ -136,6 +152,7 @@ struct KeyCap: View {
     @State private var hideToken = 0
 
     private let systemBlue = Color(red: 0.0, green: 0.478, blue: 1.0)
+    private let radius: CGFloat = 16
 
     var body: some View {
         Text(title)
@@ -143,16 +160,65 @@ struct KeyCap: View {
             .foregroundStyle(pressed ? Color.white : Color.primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(pressed ? systemBlue.opacity(0.92) : Color.clear)
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .fill(pressed ? systemBlue : Color.clear)
             }
-            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: 16))
+            .glassEffect(.clear.interactive(), in: .rect(cornerRadius: radius))
+            .overlay {
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.85),
+                                     Color.white.opacity(0.12),
+                                     Color.white.opacity(0.55)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                    .allowsHitTesting(false)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [Color.cyan.opacity(0.35),
+                                     Color.clear,
+                                     Color.pink.opacity(0.30)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .blendMode(.plusLighter)
+                    .allowsHitTesting(false)
+            }
+            .overlay {
+                GeometryReader { geo in
+                    Ellipse()
+                        .fill(
+                            RadialGradient(
+                                colors: [Color.white.opacity(0.45), Color.clear],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: geo.size.width * 0.55
+                            )
+                        )
+                        .frame(width: geo.size.width * 0.88,
+                               height: geo.size.height * 0.5)
+                        .position(x: geo.size.width * 0.46,
+                                  y: geo.size.height * 0.26)
+                        .blur(radius: 6)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+                .allowsHitTesting(false)
+            }
             .overlay {
                 if pressed {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
                         .fill(
                             LinearGradient(
-                                colors: [Color.white.opacity(0.38), Color.white.opacity(0.02)],
+                                colors: [Color.white.opacity(0.22), Color.white.opacity(0.0)],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -162,7 +228,7 @@ struct KeyCap: View {
             }
             .scaleEffect(pressed ? 1.6 : 1.0)
             .zIndex(pressed ? 1 : 0)
-            .shadow(color: pressed ? systemBlue.opacity(0.5) : .clear, radius: 18)
+            .shadow(color: pressed ? systemBlue.opacity(0.55) : .clear, radius: 18)
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
