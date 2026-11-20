@@ -129,7 +129,7 @@ final class GlassKey: UIControl {
 
         layer.cornerRadius = 11
         layer.cornerCurve = .continuous
-        clipsToBounds = false
+        clipsToBounds = true
 
         blur.isUserInteractionEnabled = false
         blur.layer.cornerRadius = 11
@@ -163,11 +163,7 @@ final class GlassKey: UIControl {
         rim.lineWidth = 1.0
         layer.addSublayer(rim)
 
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = glassy ? 0.10 : 0.06
-        layer.shadowRadius = 3
-        layer.shadowOffset = CGSize(width: 0, height: 1)
-    }
+        
 
     required init?(coder: NSCoder) { fatalError() }
 
@@ -206,4 +202,4 @@ final class GlassKey: UIControl {
             }
         }
     }
-}
+
