@@ -11,10 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Select Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
       - name: Show Xcode
-        run: |
-          xcodebuild -version
-          ls /Applications | grep -i xcode || true
+        run: xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
